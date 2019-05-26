@@ -32,7 +32,6 @@ import argparse
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-net_name = config.NET_NAME
 image_size = config.IMAGE_SIZE
 image_dir = config.IMAGE_DIR
 
@@ -56,11 +55,7 @@ def eval_model(model, eval_loader):
                     h_max = min(h, (i + 1) * image_size)
                     w_max = min(w, (j + 1) * image_size)
                     inputs_part = inputs[:,:, i*image_size:h_max, j*image_size:w_max]
-                    if net_name == 'unet':
-                        masks_pred_single = model(inputs_part)
-                    elif net_name == 'hednet':
-                        masks_pred_single = model(inputs_part)[-1]
-                    
+                    masks_pred_single = model(inputs_part)
                     masks_pred[:, :, i*image_size:h_max, j*image_size:w_max] = masks_pred_single
 
             masks_pred_softmax_batch = F.softmax(masks_pred, dim=1).cpu().numpy()
@@ -124,10 +119,7 @@ if __name__ == '__main__':
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
-    if net_name == 'unet':
-        model = UNet(n_channels=3, n_classes=2)
-    else:
-        model = HNNNet(pretrained=True, class_number=2)
+    model = UNet(n_channels=3, n_classes=2)
 
     resume = args.model
 
@@ -142,13 +134,8 @@ if __name__ == '__main__':
     model.to(device)
 
     test_image_paths, test_mask_paths = get_images(image_dir, args.preprocess, phase='test')
-
-    if net_name == 'unet':
-        test_dataset = IDRIDDataset(test_image_paths, test_mask_paths, config.LESION_IDS[args.lesion])
-    elif net_name == 'hednet':
-        test_dataset = IDRIDDataset(test_image_paths, test_mask_paths, config.LESION_IDS[args.lesion], \
-            transform=Compose([Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),]))
-
+    test_dataset = IDRIDDataset(test_image_paths, test_mask_paths, config.LESION_IDS[args.lesion])
+    
     test_loader = DataLoader(test_dataset, 1, shuffle=False)
     auc_result = eval_model(model, test_loader)
     print(auc_result)
