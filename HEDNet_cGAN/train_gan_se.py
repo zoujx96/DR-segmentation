@@ -9,7 +9,6 @@ from torch.autograd import Variable
 import os
 from optparse import OptionParser
 import numpy as np
-from tqdm import tqdm
 import random
 import copy
 from sklearn.metrics import precision_recall_curve, average_precision_score
@@ -22,7 +21,6 @@ from torch import optim
 from torch.optim import lr_scheduler
 
 import config_gan_se as config
-from unet import UNet
 from hednet import HNNNet
 from dnet import DNet
 from utils import get_images
@@ -30,14 +28,11 @@ from dataset import IDRIDDataset
 from torchvision import datasets, models, transforms
 from transform.transforms_group import *
 from torch.utils.data import DataLoader, Dataset
-from logger import Logger
 import argparse
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-#logger = Logger('./results/logs', config.LOG_DIR)
 dir_checkpoint = config.MODELS_DIR
-net_name = config.NET_NAME
 lesions = [config.LESION_NAME]
 rotation_angle = config.ROTATION_ANGEL
 image_size = config.IMAGE_SIZE
@@ -66,52 +61,9 @@ def eval_model(model, eval_loader):
                     h_max = min(h, (i + 1) * image_size)
                     w_max = min(w, (j + 1) * image_size)
                     inputs_part = inputs[:,:, i*image_size:h_max, j*image_size:w_max]
-                    if net_name == 'unet':
-                        masks_pred_single = model(inputs_part)
-                    elif net_name == 'hednet':
-                        masks_pred_single = model(inputs_part)[-1]
+                    masks_pred_single = model(inputs_part)[-1]
                     
                     masks_pred[:, :, i*image_size:h_max, j*image_size:w_max] = masks_pred_single
-
-                    '''
-                    if masks_pred_single.shape[2] != masks_pred_single.shape[3]:
-                        pass
-                    else:
-                        true_masks_part = true_masks[:,:, i*image_size:h_max, j*image_size:w_max]
-                        masks_pred_transpose = masks_pred_single.permute(0, 2, 3, 1)
-                        masks_pred_flat = masks_pred_transpose.reshape(-1, masks_pred_transpose.shape[-1])
-                        true_masks_indices = torch.argmax(true_masks_part, 1)
-                        true_masks_flat = true_masks_indices.reshape(-1)
-
-                        loss_ce = criterion(masks_pred_flat, true_masks_flat.long())
-                        eval_loss_ce += loss_ce
-                        eval_tot += 1
-
-                        # add descriminator loss
-                        masks_pred_softmax = softmax(masks_pred_single)
-
-                        if config.D_MULTIPLY:
-                            input_real = torch.matmul(inputs_part, true_masks_part[:, 1:, :, :])
-                            input_real = image_to_patch(input_real, config.PATCH_SIZE)
-                            input_fake = torch.matmul(inputs_part, masks_pred_softmax[:, 1:, :, :])
-                            input_fake = image_to_patch(input_fake, config.PATCH_SIZE)
-                        else:
-                            input_real = torch.cat((inputs_part, true_masks_part[:, 1:, :, :]), 1)
-                            input_real = image_to_patch(input_real, config.PATCH_SIZE)
-                            input_fake = torch.cat((inputs_part, masks_pred_softmax[:, 1:, :, :]), 1)
-                            input_fake = image_to_patch(input_fake, config.PATCH_SIZE)
-                        d_real = dnet(input_real)
-                        d_fake = dnet(input_fake)
-                        d_real_loss = -torch.mean(d_real)
-                        d_fake_loss = torch.mean(d_fake)
-                        
-                        loss_d = d_real_loss + d_fake_loss
-                        eval_loss_d += loss_d
-
-                        loss_gan = -d_fake_loss
-                        loss_g = loss_ce + loss_gan * gan_weight
-                        eval_loss_g += loss_g
-                        '''
 
             masks_pred_softmax_batch = softmax(masks_pred).cpu().numpy()
             masks_soft_batch = masks_pred_softmax_batch[:, 1:, :, :]
@@ -124,21 +76,14 @@ def eval_model(model, eval_loader):
     masks_hard = np.array(masks_hard).transpose((1, 0, 2, 3))
     masks_soft = np.reshape(masks_soft, (masks_soft.shape[0], -1))
     masks_hard = np.reshape(masks_hard, (masks_hard.shape[0], -1))
-
-    #masks_soft = masks_soft.round(2)
     
     ap = average_precision_score(masks_hard[0], masks_soft[0])
-    #precision, recall, _ = precision_recall_curve(masks_hard[0], masks_soft[0])
-    #return ap, precision, recall
     return ap
 
 def denormalize(inputs):
-    if net_name == 'unet':
-        return (inputs * 255.).to(device=device, dtype=torch.uint8)
-    else:
-        mean = torch.FloatTensor([0.485, 0.456, 0.406]).to(device)
-        std = torch.FloatTensor([0.229, 0.224, 0.225]).to(device)
-        return ((inputs * std[None, :, None, None] + mean[None, :, None, None])*255.).to(device=device, dtype=torch.uint8)
+    mean = torch.FloatTensor([0.485, 0.456, 0.406]).to(device)
+    std = torch.FloatTensor([0.229, 0.224, 0.225]).to(device)
+    return ((inputs * std[None, :, None, None] + mean[None, :, None, None])*255.).to(device=device, dtype=torch.uint8)
 
 def generate_log_images(inputs_t, true_masks_t, masks_pred_softmax_t):
     true_masks = (true_masks_t * 255.).to(device=device, dtype=torch.uint8)
@@ -182,11 +127,7 @@ def train_model(model, dnet, gan_exist, train_loader, eval_loader, criterion, g_
         for inputs, true_masks in train_loader:
             inputs = inputs.to(device=device, dtype=torch.float)
             true_masks = true_masks.to(device=device, dtype=torch.float)
-
-            if net_name == 'unet':
-                masks_pred = model(inputs)
-            elif net_name == 'hednet':
-                masks_pred = model(inputs)[-1]
+            masks_pred = model(inputs)[-1]
 
             masks_pred_transpose = masks_pred.permute(0, 2, 3, 1)
             masks_pred_flat = masks_pred_transpose.reshape(-1, masks_pred_transpose.shape[-1])
@@ -194,14 +135,7 @@ def train_model(model, dnet, gan_exist, train_loader, eval_loader, criterion, g_
             true_masks_flat = true_masks_indices.reshape(-1)
             loss_ce = criterion(masks_pred_flat, true_masks_flat.long())
             masks_pred_softmax = softmax(masks_pred)
-            
-            # Save images
-            '''
-            if (epoch + 1) % 20 == 0:
-                images_batch = generate_log_images(inputs, true_masks, masks_pred_softmax) 
-                vis_images.extend(images_batch)
-            '''
-
+           
             ce_weight = 1.
             g_loss = loss_ce * ce_weight
 
@@ -270,9 +204,7 @@ def train_model(model, dnet, gan_exist, train_loader, eval_loader, criterion, g_
 
                 torch.save(state, \
                             os.path.join(dir_checkpoint, 'model_' + gan_exist + '.pth.tar'))
-        #logger.image_summary('train_images', [vis_image.cpu().numpy() for vis_image in vis_images], step=tot_step_count)
-
-
+        
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--seed', type=int, default=1234)
@@ -292,10 +224,7 @@ if __name__ == '__main__':
     else:
         gan_weight = 0.
 
-    if net_name == 'unet':
-        model = UNet(n_channels=3, n_classes=2)
-    else:
-        model = HNNNet(pretrained=True, class_number=2)
+    model = HNNNet(pretrained=True, class_number=2)
    
     if config.D_MULTIPLY:
         dnet = DNet(input_dim=3, output_dim=1, input_size=config.PATCH_SIZE)
@@ -335,25 +264,16 @@ if __name__ == '__main__':
     train_image_paths, train_mask_paths = get_images(image_dir, config.PREPROCESS, phase='train')
     eval_image_paths, eval_mask_paths = get_images(image_dir, config.PREPROCESS, phase='eval')
 
-    if net_name == 'unet':
-        train_dataset = IDRIDDataset(train_image_paths, train_mask_paths, config.CLASS_ID, transform=
-                                Compose([
-                                RandomRotation(rotation_angle),
-                                #ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.2),
-                                RandomCrop(image_size),
-                    ]))
-        eval_dataset = IDRIDDataset(eval_image_paths, eval_mask_paths, config.CLASS_ID)
-    elif net_name == 'hednet':
-        train_dataset = IDRIDDataset(train_image_paths, train_mask_paths, config.CLASS_ID, transform=
-                                Compose([
-                                RandomRotation(rotation_angle),
-                                RandomCrop(image_size),
-                                #ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.2),
-                                Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-                    ]))
-        eval_dataset = IDRIDDataset(eval_image_paths, eval_mask_paths, config.CLASS_ID, transform=Compose([
-                                Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-                    ]))
+    train_dataset = IDRIDDataset(train_image_paths, train_mask_paths, config.CLASS_ID, transform=
+                            Compose([
+                            RandomRotation(rotation_angle),
+                            RandomCrop(image_size),
+                            #ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.2),
+                            Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+                ]))
+    eval_dataset = IDRIDDataset(eval_image_paths, eval_mask_paths, config.CLASS_ID, transform=Compose([
+                            Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+                ]))
 
     train_loader = DataLoader(train_dataset, batchsize, shuffle=True)
     eval_loader = DataLoader(eval_dataset, batchsize, shuffle=False)
