@@ -21,7 +21,6 @@ from torch.optim import lr_scheduler
 
 import config
 from unet import UNet
-from hednet import HNNNet
 from utils import get_images
 from dataset import IDRIDDataset
 from torchvision import datasets, models, transforms
