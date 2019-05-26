@@ -1,1 +1,1 @@
-Download the dataset and put it here.
+Download IDRiD dataset and put it here.
