@@ -71,11 +71,7 @@ def eval_model(model, eval_loader):
     masks_soft = np.reshape(masks_soft, (masks_soft.shape[0], -1))
     masks_hard = np.reshape(masks_hard, (masks_hard.shape[0], -1))
 
-    #masks_soft = masks_soft.round(2)
-    
     ap = average_precision_score(masks_hard[0], masks_soft[0])
-    #precision, recall, _ = precision_recall_curve(masks_hard[0], masks_soft[0])
-    #return ap, precision, recall
     return ap
 
 def denormalize(inputs):
@@ -129,11 +125,6 @@ def train_model(model, lesion, preprocess, train_loader, eval_loader, criterion,
             loss_ce = criterion(masks_pred_flat, true_masks_flat.long())
             
             # Save images
-            '''
-            if (epoch + 1) % 20 == 0:
-                images_batch = generate_log_images(inputs, true_masks, masks_pred_softmax) 
-                vis_images.extend(images_batch)
-            '''
 
             ce_weight = 1.
             g_loss = loss_ce * ce_weight
@@ -166,9 +157,7 @@ def train_model(model, lesion, preprocess, train_loader, eval_loader, criterion,
 
                 torch.save(state, \
                             os.path.join(dir_checkpoint, 'model_' + preprocess + '.pth.tar'))
-        #logger.image_summary('train_images', [vis_image.cpu().numpy() for vis_image in vis_images], step=tot_step_count)
-
-
+        
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--seed', type=int, default=1234)
@@ -211,7 +200,6 @@ if __name__ == '__main__':
     train_dataset = IDRIDDataset(train_image_paths, train_mask_paths, config.LESION_IDS[args.lesion], transform=
                             Compose([
                             RandomRotation(rotation_angle),
-                            #ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.2),
                             RandomCrop(image_size),
                 ]))
     eval_dataset = IDRIDDataset(eval_image_paths, eval_mask_paths, config.LESION_IDS[args.lesion])
