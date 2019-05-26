@@ -70,7 +70,7 @@ def eval_model(model, eval_loader):
     masks_soft = np.reshape(masks_soft, (masks_soft.shape[0], -1))
     masks_hard = np.reshape(masks_hard, (masks_hard.shape[0], -1))
     
-    ap = average_precision_score(masks_hard, masks_soft)
+    ap = average_precision_score(masks_hard[0], masks_soft[0])
     return ap
 
 if __name__ == '__main__':
