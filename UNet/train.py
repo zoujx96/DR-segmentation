@@ -31,7 +31,6 @@ import argparse
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-net_name = config.NET_NAME
 rotation_angle = config.ROTATION_ANGEL
 image_size = config.IMAGE_SIZE
 image_dir = config.IMAGE_DIR
@@ -57,13 +56,8 @@ def eval_model(model, eval_loader):
                     h_max = min(h, (i + 1) * image_size)
                     w_max = min(w, (j + 1) * image_size)
                     inputs_part = inputs[:,:, i*image_size:h_max, j*image_size:w_max]
-                    if net_name == 'unet':
-                        masks_pred_single = model(inputs_part)
-                    elif net_name == 'hednet':
-                        masks_pred_single = model(inputs_part)[-1]
-                    
+                    masks_pred_single = model(inputs_part)
                     masks_pred[:, :, i*image_size:h_max, j*image_size:w_max] = masks_pred_single
-
 
             masks_pred_softmax_batch = F.softmax(masks_pred, dim=1).cpu().numpy()
             masks_soft_batch = masks_pred_softmax_batch[:, 1:, :, :]
@@ -85,12 +79,7 @@ def eval_model(model, eval_loader):
     return ap
 
 def denormalize(inputs):
-    if net_name == 'unet':
-        return (inputs * 255.).to(device=device, dtype=torch.uint8)
-    else:
-        mean = torch.FloatTensor([0.485, 0.456, 0.406]).to(device)
-        std = torch.FloatTensor([0.229, 0.224, 0.225]).to(device)
-        return ((inputs * std[None, :, None, None] + mean[None, :, None, None])*255.).to(device=device, dtype=torch.uint8)
+    return (inputs * 255.).to(device=device, dtype=torch.uint8)
 
 def generate_log_images(inputs_t, true_masks_t, masks_pred_softmax_t):
     true_masks = (true_masks_t * 255.).to(device=device, dtype=torch.uint8)
@@ -132,12 +121,7 @@ def train_model(model, lesion, preprocess, train_loader, eval_loader, criterion,
         for inputs, true_masks in train_loader:
             inputs = inputs.to(device=device, dtype=torch.float)
             true_masks = true_masks.to(device=device, dtype=torch.float)
-
-            if net_name == 'unet':
-                masks_pred = model(inputs)
-            elif net_name == 'hednet':
-                masks_pred = model(inputs)[-1]
-
+            masks_pred = model(inputs)
             masks_pred_transpose = masks_pred.permute(0, 2, 3, 1)
             masks_pred_flat = masks_pred_transpose.reshape(-1, masks_pred_transpose.shape[-1])
             true_masks_indices = torch.argmax(true_masks, 1)
@@ -199,12 +183,8 @@ if __name__ == '__main__':
         torch.cuda.manual_seed(args.seed)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
-
-    if net_name == 'unet':
-        model = UNet(n_channels=3, n_classes=2)
-    else:
-        model = HNNNet(pretrained=True, class_number=2)
-
+    
+    model = UNet(n_channels=3, n_classes=2)
     g_optimizer = optim.SGD(model.parameters(),
                               lr=config.G_LEARNING_RATE,
                               momentum=0.9,
@@ -228,25 +208,13 @@ if __name__ == '__main__':
     train_image_paths, train_mask_paths = get_images(image_dir, args.preprocess, phase='train')
     eval_image_paths, eval_mask_paths = get_images(image_dir, args.preprocess, phase='eval')
 
-    if net_name == 'unet':
-        train_dataset = IDRIDDataset(train_image_paths, train_mask_paths, config.LESION_IDS[args.lesion], transform=
-                                Compose([
-                                RandomRotation(rotation_angle),
-                                #ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.2),
-                                RandomCrop(image_size),
-                    ]))
-        eval_dataset = IDRIDDataset(eval_image_paths, eval_mask_paths, config.LESION_IDS[args.lesion])
-    elif net_name == 'hednet':
-        train_dataset = IDRIDDataset(train_image_paths, train_mask_paths, config.LESION_IDS[args.lesion], transform=
-                                Compose([
-                                RandomRotation(rotation_angle),
-                                RandomCrop(image_size),
-                                #ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.2),
-                                Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-                    ]))
-        eval_dataset = IDRIDDataset(eval_image_paths, eval_mask_paths, config.LESION_IDS[args.lesion], transform=Compose([
-                                Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-                    ]))
+    train_dataset = IDRIDDataset(train_image_paths, train_mask_paths, config.LESION_IDS[args.lesion], transform=
+                            Compose([
+                            RandomRotation(rotation_angle),
+                            #ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.2),
+                            RandomCrop(image_size),
+                ]))
+    eval_dataset = IDRIDDataset(eval_image_paths, eval_mask_paths, config.LESION_IDS[args.lesion])
 
     train_loader = DataLoader(train_dataset, batchsize, shuffle=True)
     eval_loader = DataLoader(eval_dataset, batchsize, shuffle=False)
