@@ -69,39 +69,9 @@ def eval_model(model, eval_loader):
     masks_hard = np.array(masks_hard).transpose((1, 0, 2, 3))
     masks_soft = np.reshape(masks_soft, (masks_soft.shape[0], -1))
     masks_hard = np.reshape(masks_hard, (masks_hard.shape[0], -1))
-
-    #masks_soft = masks_soft.round(2)
-    masks_hard = masks_hard[0].astype(np.int)
-    #masks_hard = masks_hard[0]
-    masks_soft = masks_soft[0].round().astype(np.int)
-
-    f1 = f1_score(masks_hard, masks_soft)
     
-    #ap = average_precision_score(masks_hard, masks_soft)
-    #precisions, recalls, _ = precision_recall_curve(masks_hard, masks_soft)
-    '''
-    thresholds = np.linspace(0, 1, 33)
-    thresholds = thresholds[:-1]
-    new_precisions = []
-    new_recalls = []
-    for threshold in thresholds:
-        new_precisions.append(precision_score(masks_hard, (masks_soft >= threshold).astype(np.int)))
-        new_recalls.append(recall_score(masks_hard, (masks_soft >= threshold).astype(np.int)))
-
-    new_precisions.append(1.)
-    new_recalls.append(0.)
-
-    new_precisions = np.array(new_precisions)
-    new_recalls = np.array(new_recalls)
-
-    new_precisions = new_precisions[np.argsort(new_recalls)]
-    new_recalls = np.sort(new_recalls)
-    auc_result = auc(new_recalls, new_precisions)
-    '''
-    #return ap, precision, recall
-    #return auc_result
-    #return ap
-    return f1
+    ap = average_precision_score(masks_hard, masks_soft)
+    return ap
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
