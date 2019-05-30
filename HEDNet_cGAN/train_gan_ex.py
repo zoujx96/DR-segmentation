@@ -9,7 +9,6 @@ from torch.autograd import Variable
 import os
 from optparse import OptionParser
 import numpy as np
-from tqdm import tqdm
 import random
 import copy
 from sklearn.metrics import precision_recall_curve, average_precision_score
