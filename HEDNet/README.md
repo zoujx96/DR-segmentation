@@ -1,5 +1,5 @@
 | Preprocessing Index | Preprocessing Methods |
-| --- | --- |
+| :---: | :---: |
 | '0' | None |
 | '1' | Brightness Balance |
 | '2' | Contrast Enhancement |
