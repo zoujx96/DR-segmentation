@@ -1,4 +1,6 @@
-To train the model, run ```python train.py --seed 765 --preprocess '2' --lesion 'MA'``` for training a HEDNet model to segment Microaneurysm lesion images with preprocessing method of Contrast Enhancement using random seed 765.
+To train the model, run
+```python train.py --seed 765 --preprocess '2' --lesion 'MA'``` 
+for training a HEDNet model to segment Microaneurysm lesion images with preprocessing method of Contrast Enhancement using random seed 765.
 
 The meaning of each preprocessing index is indicated in the following table.
 
