@@ -13,4 +13,4 @@ The meaning of each preprocessing index is indicated in the following table.
 | '6' | Denoising + Contrast Enhancement |
 | '7' | Denoising + Contrast Enhancement + Brightness Balance |
 
-To evaluate the model, run
+To evaluate the model, run ```python evaluate_model.py --seed 765 --preprocess '2' --lesion 'MA' --model results/models_ma/model.pth.tar```.
