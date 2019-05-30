@@ -31,7 +31,6 @@ import argparse
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-net_name = config.NET_NAME
 image_size = config.IMAGE_SIZE
 image_dir = config.IMAGE_DIR
 
@@ -76,33 +75,10 @@ def eval_model(model, eval_loader):
     masks_soft = np.reshape(masks_soft, (masks_soft.shape[0], -1))
     masks_hard = np.reshape(masks_hard, (masks_hard.shape[0], -1))
 
-    #masks_soft = masks_soft.round(2)
     masks_hard = masks_hard[0].astype(np.int)
     masks_soft = masks_soft[0]
     
     ap = average_precision_score(masks_hard, masks_soft)
-    #precisions, recalls, _ = precision_recall_curve(masks_hard, masks_soft)
-    '''
-    thresholds = np.linspace(0, 1, 33)
-    thresholds = thresholds[:-1]
-    new_precisions = []
-    new_recalls = []
-    for threshold in thresholds:
-        new_precisions.append(precision_score(masks_hard, (masks_soft >= threshold).astype(np.int)))
-        new_recalls.append(recall_score(masks_hard, (masks_soft >= threshold).astype(np.int)))
-
-    new_precisions.append(1.)
-    new_recalls.append(0.)
-
-    new_precisions = np.array(new_precisions)
-    new_recalls = np.array(new_recalls)
-
-    new_precisions = new_precisions[np.argsort(new_recalls)]
-    new_recalls = np.sort(new_recalls)
-    auc_result = auc(new_recalls, new_precisions)
-    '''
-    #return ap, precision, recall
-    #return auc_result
     return ap
     
 if __name__ == '__main__':
@@ -121,10 +97,7 @@ if __name__ == '__main__':
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
-    if net_name == 'unet':
-        model = UNet(n_channels=3, n_classes=2)
-    else:
-        model = HNNNet(pretrained=True, class_number=2)
+    model = HNNNet(pretrained=True, class_number=2)
 
     resume = args.model
 
@@ -140,11 +113,8 @@ if __name__ == '__main__':
 
     test_image_paths, test_mask_paths = get_images(image_dir, args.preprocess, phase='test')
 
-    if net_name == 'unet':
-        test_dataset = IDRIDDataset(test_image_paths, test_mask_paths, config.LESION_IDS[args.lesion])
-    elif net_name == 'hednet':
-        test_dataset = IDRIDDataset(test_image_paths, test_mask_paths, config.LESION_IDS[args.lesion], \
-            transform=Compose([Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),]))
+    test_dataset = IDRIDDataset(test_image_paths, test_mask_paths, config.LESION_IDS[args.lesion], \
+        transform=Compose([Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),]))
 
     test_loader = DataLoader(test_dataset, 1, shuffle=False)
     auc_result = eval_model(model, test_loader)
