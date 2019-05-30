@@ -1,5 +1,5 @@
 # DR-segmentation
-Code Repo for Lesion Segmentation for Diabetic Retinopathy with Adversarial Learning
+Open-sourced code for research project *Improving Lesion Segmentation for Diabetic Retinopathy with Adversarial Learning*.
 
 ## Requirements:
 pytorch 1.0, torchvision 0.2, numpy 1.16, scikit-learn 0.20, cv2 3.4, PIL 5.1 and ipdb 0.12.
