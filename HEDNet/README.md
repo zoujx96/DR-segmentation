@@ -13,4 +13,4 @@ The meaning of each preprocessing index is indicated in the following table.
 | '6' | Denoising + Contrast Enhancement |
 | '7' | Denoising + Contrast Enhancement + Brightness Balance |
 
-To evaluate the model on the test set, run ```python evaluate_model.py --seed 765 --preprocess '2' --lesion 'MA' --model results/models_ma/model.pth.tar``` for evaluating a saved HEDNet model checkpoint on MA under ```results/``` with preprocessing method of Contrast Enhancement using random seed 765. The value of the argument `model` is the directory of the saved model checkpoints.
+To evaluate the model on the test set, run ```python evaluate_model.py --seed 765 --preprocess '2' --lesion 'MA' --model results/models_ma/model.pth.tar``` for evaluating a saved HEDNet model checkpoint on MA under ```results/``` with preprocessing method of Contrast Enhancement using random seed 765. `results/models_ma/model.pth.tar` is the directory of the saved model checkpoints.
