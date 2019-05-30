@@ -8,4 +8,4 @@ pytorch 1.0, torchvision 0.2, numpy 1.16, scikit-learn 0.20, cv2 3.4, PIL 5.1 an
 
 2. To prepare for preprocessing, please run ```HEDNet_cGAN/blackmask.py``` to get the mask for each fundus image. 
 
-3. For training and evaluating **UNet** model, please go to ```UNet/```. For training and evaluating **HEDNet** model, please go to ```HEDNet/```. For training and evaluating **HEDNet_cGAN** model, please go to ```HEDNet_cGAN/```.
+3. For training and evaluating **UNet** model, please go to ```UNet/```. For training and evaluating **HEDNet** model, please go to ```HEDNet/```. For training and evaluating **HEDNet with conditional GAN** model, please go to ```HEDNet_cGAN/```.
