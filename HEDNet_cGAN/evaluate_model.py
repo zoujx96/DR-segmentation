@@ -12,7 +12,6 @@ import numpy as np
 import random
 import copy
 from sklearn.metrics import precision_recall_curve, average_precision_score, precision_score, recall_score, auc
-import matplotlib.pyplot as plt
 
 import torch
 import torch.backends.cudnn as cudnn
@@ -31,7 +30,6 @@ from transform.transforms_group import *
 from torch.utils.data import DataLoader, Dataset
 import argparse
 
-plt.switch_backend('Agg')
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 image_size = config.IMAGE_SIZE
