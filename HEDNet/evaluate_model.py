@@ -9,7 +9,6 @@ from torch.autograd import Variable
 import os
 from optparse import OptionParser
 import numpy as np
-from tqdm import tqdm
 import random
 import copy
 from sklearn.metrics import precision_recall_curve, average_precision_score
@@ -22,7 +21,6 @@ from torch import optim
 from torch.optim import lr_scheduler
 
 import config
-from unet import UNet
 from hednet import HNNNet
 from utils import get_images
 from dataset import IDRIDDataset
