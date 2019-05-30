@@ -20,7 +20,6 @@ from torch import optim
 from torch.optim import lr_scheduler
 
 import config
-from unet import UNet
 from hednet import HNNNet
 from utils import get_images
 from dataset import IDRIDDataset
@@ -31,7 +30,6 @@ import argparse
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-net_name = config.NET_NAME
 rotation_angle = config.ROTATION_ANGEL
 image_size = config.IMAGE_SIZE
 image_dir = config.IMAGE_DIR
@@ -77,11 +75,7 @@ def eval_model(model, eval_loader, softmax):
     masks_soft = np.reshape(masks_soft, (masks_soft.shape[0], -1))
     masks_hard = np.reshape(masks_hard, (masks_hard.shape[0], -1))
 
-    #masks_soft = masks_soft.round(2)
-    
     ap = average_precision_score(masks_hard[0], masks_soft[0])
-    #precision, recall, _ = precision_recall_curve(masks_hard[0], masks_soft[0])
-    #return ap, precision, recall
     return ap
 
 def denormalize(inputs):
@@ -144,13 +138,6 @@ def train_model(model, lesion, preprocess, train_loader, eval_loader, criterion,
             true_masks_indices = torch.argmax(true_masks, 1)
             true_masks_flat = true_masks_indices.reshape(-1)
             loss_ce = criterion(masks_pred_flat, true_masks_flat.long())
-            
-            # Save images
-            '''
-            if (epoch + 1) % 20 == 0:
-                images_batch = generate_log_images(inputs, true_masks, masks_pred_softmax) 
-                vis_images.extend(images_batch)
-            '''
 
             ce_weight = 1.
             g_loss = loss_ce * ce_weight
@@ -183,8 +170,6 @@ def train_model(model, lesion, preprocess, train_loader, eval_loader, criterion,
 
                 torch.save(state, \
                             os.path.join(dir_checkpoint, 'model_' + preprocess + '.pth.tar'))
-        #logger.image_summary('train_images', [vis_image.cpu().numpy() for vis_image in vis_images], step=tot_step_count)
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -201,10 +186,7 @@ if __name__ == '__main__':
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
-    if net_name == 'unet':
-        model = UNet(n_channels=3, n_classes=2)
-    else:
-        model = HNNNet(pretrained=True, class_number=2)
+    model = HNNNet(pretrained=True, class_number=2)
 
     g_optimizer = optim.SGD(model.parameters(),
                               lr=config.G_LEARNING_RATE,
@@ -228,24 +210,15 @@ if __name__ == '__main__':
 
     train_image_paths, train_mask_paths = get_images(image_dir, args.preprocess, phase='train')
     eval_image_paths, eval_mask_paths = get_images(image_dir, args.preprocess, phase='eval')
-
-    if net_name == 'unet':
-        train_dataset = IDRIDDataset(train_image_paths, train_mask_paths, config.LESION_IDS[args.lesion], transform=
-                                Compose([
-                                RandomRotation(rotation_angle),
-                                #ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.2),
-                                RandomCrop(image_size),
-                    ]))
-        eval_dataset = IDRIDDataset(eval_image_paths, eval_mask_paths, config.LESION_IDS[args.lesion])
-    elif net_name == 'hednet':
-        train_dataset = IDRIDDataset(train_image_paths, train_mask_paths, config.LESION_IDS[args.lesion], transform=
+    
+    train_dataset = IDRIDDataset(train_image_paths, train_mask_paths, config.LESION_IDS[args.lesion], transform=
                                 Compose([
                                 RandomRotation(rotation_angle),
                                 RandomCrop(image_size),
                                 #ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.2),
                                 Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
                     ]))
-        eval_dataset = IDRIDDataset(eval_image_paths, eval_mask_paths, config.LESION_IDS[args.lesion], transform=Compose([
+    eval_dataset = IDRIDDataset(eval_image_paths, eval_mask_paths, config.LESION_IDS[args.lesion], transform=Compose([
                                 Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
                     ]))
 
