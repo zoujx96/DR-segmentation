@@ -3,7 +3,7 @@
 # **************************************
 # @Author  : Qiqi Xiao & Jiaxu Zou
 # @Email     : xiaoqiqi177@gmail.com & zoujx96@gmail.com
-# @File    : config_gan_ex.py
+# @File    : config_gan_he.py
 # **************************************
 LESION_IDS = {'EX':0, 'HE':1, 'MA':2, 'SE':3}
 
