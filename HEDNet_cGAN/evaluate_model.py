@@ -1,9 +1,10 @@
-"""
-File: train.py
-Created by: Qiqi Xiao
-Email: xiaoqiqi177<at>gmail<dot>com
-"""
-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# **************************************
+# @Author  : Qiqi Xiao & Jiaxu Zou
+# @Email     : xiaoqiqi177@gmail.com & zoujx96@gmail.com
+# @File    : evaluate_model.py
+# **************************************
 import sys
 from torch.autograd import Variable
 import os
