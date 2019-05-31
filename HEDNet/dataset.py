@@ -1,10 +1,10 @@
-"""
-File: dataset.py
-Created by: Qiqi Xiao
-Email: xiaoqiqi177<at>gmail<dot>com
-"""
-
-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# **************************************
+# @Author  : Qiqi Xiao
+# @Email     : xiaoqiqi177@gmail.com
+# @File    : dataset.py
+# **************************************
 import numpy as np
 from torchvision import datasets, models, transforms
 import torchvision
