@@ -1,3 +1,10 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# **************************************
+# @Author  : Qiqi Xiao
+# @Email     : xiaoqiqi177@gmail.com
+# @File    : dnet.py
+# **************************************
 import utils, torch, time, os, pickle
 import numpy as np
 import torch.nn as nn
