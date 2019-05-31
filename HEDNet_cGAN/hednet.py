@@ -1,3 +1,10 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# **************************************
+# @Author  : Qiqi Xiao
+# @Email     : xiaoqiqi177@gmail.com
+# @File    : hednet.py
+# **************************************
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
