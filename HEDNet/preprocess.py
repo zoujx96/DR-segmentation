@@ -1,5 +1,10 @@
-#Inspired from: https://github.com/MasazI/clahe_python_opencv/blob/master/core.py
-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# **************************************
+# @Author  : Qiqi Xiao
+# @Email     : xiaoqiqi177@gmail.com
+# @File    : preprocess.py
+# **************************************
 import sys
 import os
 import os.path
