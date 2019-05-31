@@ -1,3 +1,10 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# **************************************
+# @Author  : Qiqi Xiao & Jiaxu Zou
+# @Email     : xiaoqiqi177@gmail.com & zoujx96@gmail.com
+# @File    : config_gan_ma.py
+# **************************************
 LESION_IDS = {'EX':0, 'HE':1, 'MA':2, 'SE':3}
 
 #Modify the general parameters.
