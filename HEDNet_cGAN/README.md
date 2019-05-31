@@ -2,3 +2,5 @@ To train a HEDNet model with conditional GAN to segment Hard Exudates using rand
 To train a HEDNet model with conditional GAN to segment Soft Exudates using random seed 765, run ```python train_gan_se.py --gan True --seed 765```.  
 To train a HEDNet model with conditional GAN to segment Hemorrhages using random seed 765, run ```python train_gan_he.py --gan True --seed 765```.  
 To train a HEDNet model with conditional GAN to segment Microaneurysms using random seed 765, run ```python train_gan_ma.py --gan True --seed 765```.
+  
+To evaluate a model on the test set, run ```python evaluate_model.py --lesion MA --model results/models_ma/model.pth.tar --seed 765``` to evaluate 
