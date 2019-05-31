@@ -1,10 +1,9 @@
-
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # **************************************
 # @Author  : Qiqi Xiao
 # @Email     : xiaoqiqi177@gmail.com
-# @File    : blackmask.py
+# @File    : config_gan.py
 # **************************************
 LESION_IDS = {'EX':0, 'HE':1, 'MA':2, 'SE':3}
 
