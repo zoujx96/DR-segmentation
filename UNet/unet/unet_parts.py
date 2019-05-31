@@ -1,3 +1,10 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# **************************************
+# @Author  : Qiqi Xiao
+# @Email     : xiaoqiqi177@gmail.com
+# @File    : unet_parts.py
+# **************************************
 # sub-parts of the U-Net model
 
 import torch
