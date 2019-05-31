@@ -1,3 +1,10 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# **************************************
+# @Author  : Qiqi Xiao
+# @Email     : xiaoqiqi177@gmail.com
+# @File    : preprocess.py
+# **************************************
 #Inspired from: https://github.com/MasazI/clahe_python_opencv/blob/master/core.py
 
 import sys
