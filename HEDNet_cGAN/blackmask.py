@@ -1,10 +1,10 @@
-"""
-File: blackmask.py
-Created by: Qiqi Xiao
-Email: xiaoqiqi177<at>gmail<dot>com
-Description: Get and save the mask for each original image.
-"""
-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# **************************************
+# @Author  : Qiqi Xiao
+# @Email     : xiaoqiqi177@gmail.com
+# @File    : blackmask.py
+# **************************************
 import os
 import glob
 import cv2
