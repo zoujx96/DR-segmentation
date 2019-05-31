@@ -1,3 +1,10 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# **************************************
+# @Author  : Qiqi Xiao
+# @Email     : xiaoqiqi177@gmail.com
+# @File    : unet_model.py
+# **************************************
 # full assembly of the sub-parts to form the complete net
 
 from .unet_parts import *
