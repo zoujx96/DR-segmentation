@@ -1,6 +1,6 @@
 # DR-segmentation
 Open-sourced code for the paper 
-> Qiqi Xiao, Jiaxu Zou, Muqiao Yang, Alex Gaudio, Kris Kitani, Asim Smailagic, Pedro Costa and Min Xu, Improving Lesion Segmentation for Diabetic Retinopathy using Adversarial Learning, ICIAR, 2019
+[Qiqi Xiao, Jiaxu Zou, Muqiao Yang, Alex Gaudio, Kris Kitani, Asim Smailagic, Pedro Costa and Min Xu, Improving Lesion Segmentation for Diabetic Retinopathy using Adversarial Learning, ICIAR, 2019](https://arxiv.org/pdf/2007.13854)
 
 Please see our [Presentation at Conference](https://docs.google.com/presentation/d/1T4w1mRxClnDm0sGmlbDa8FRYbV6hLG-nA12GLtL9iwo/edit#slide=id.f18e43d3-c5f6-11e9-bf5f-cb4e139218f9)
 ## Requirements:
